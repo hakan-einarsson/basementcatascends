@@ -778,7 +778,7 @@ class GameParser {
             ArrowRight: 1,
             ArrowUp: 2,
             ArrowDown: 3,
-            z: 4,  // A
+            Space: 4,  // A
             x: 5,  // B
             Enter: 6,  // Start
             Shift: 7,  // Select
@@ -790,7 +790,7 @@ class GameParser {
 
         let keyMap = defaultKeyMap;
 
-        keyMap = { ...keyMap, ...this.inputMap.keyboard };
+        // keyMap = { ...keyMap, ...this.inputMap.keyboard };
 
         this.gamepadMap = this.inputMap.gamepad;
 
@@ -805,11 +805,17 @@ class GameParser {
             if (keyMap[e.key] !== undefined) {
                 this.keyboardState[keyMap[e.key]] = true;
             }
+            if (keyMap[e.code] !== undefined) {
+                this.keyboardState[keyMap[e.code]] = true;
+            }
         });
 
         window.addEventListener("keyup", (e) => {
             if (keyMap[e.key] !== undefined) {
                 this.keyboardState[keyMap[e.key]] = false;
+            }
+            if (keyMap[e.code] !== undefined) {
+                this.keyboardState[keyMap[e.code]] = false;
             }
         });
     }

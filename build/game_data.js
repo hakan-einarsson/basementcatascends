@@ -46,6 +46,8 @@ const renderStartScreen = (startScreen, player) => {
         }
     }
 
+
+
     spr(5, 30, 5, player.ascended ? 10 : 0);
     spr(25, 56, 5, player.timeChallenge ? 7 : 0);
     spr(24, 56 + 30, 5, player.hardCore ? 8 : 0);
@@ -416,6 +418,7 @@ const levels = [
 ]
 const cBox = { width: 6, height: 5, offsetX: 1, offsetY: 3 };
 const player = new GameObject({ x: levels[0][0] * 8, y: levels[0][1] * 8, scale: 1, name: "player" });
+player.level = 0;
 player.goalTile = { x: 88, y: 7 };
 player.add(Sprite({ id: [[0]], scale: 1, flipX: false, flipY: false })); // start frame
 player.add(AnimationPlayer({
@@ -644,7 +647,7 @@ function _update(dt) {
             resetLevel(player);
 
         }
-        if (localPosition.y > 119.5 && !player.controller.dead) {
+        if (localPosition.y > 119 && !player.controller.dead) {
             player.controller.dead = true;
             player.deaths++;
         }
