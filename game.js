@@ -50,7 +50,7 @@ const renderStartScreen = (startScreen, player) => {
 
 
 
-    spr(5, 30, 5, player.ascended ? 10 : 0);
+    spr(5, 30, 5, player.ascnded ? 10 : 0);
     spr(25, 56, 5, player.timeChallenge ? 7 : 0);
     spr(24, 56 + 30, 5, player.hardCore ? 8 : 0);
 
@@ -157,7 +157,7 @@ const PlayerController = ({
             this.level = 0;
             g.velocity.x = 0;
             g.velocity.y = -40;
-            g.ascended = true;
+            g.ascnded = true;
             g.hasPlayed = false;
             g.saveToLocalStorage();
             return;
@@ -467,7 +467,7 @@ player.onDamage = () => {
 };
 player.reset = () => {
     player.ascension = 0;
-    player.mode = 0; // 0 = normal, 1 = ascended, 2 = hard, 3 = time challenge
+    player.mode = 0; // 0 = normal, 1 = ascnded, 2 = hard, 3 = time challenge
     player.deaths = 0;
     player.time = 0;
     player.controller.resetState();
@@ -488,7 +488,7 @@ player.loadFromLocalStorage = () => {
         player.deaths = saveData.deaths || 0;
         player.time = saveData.time || 0;
         player.lives = saveData.lives || 0;
-        player.ascended = saveData.ascended || false;
+        player.ascnded = saveData.ascnded || false;
         player.timeChallenge = saveData.timeChallenge || false;
         player.hardCore = saveData.hardCore || false;
         player.mode = saveData.mode || 0;
@@ -503,7 +503,7 @@ player.saveToLocalStorage = () => {
         deaths: player.deaths,
         time: player.time,
         lives: player.lives,
-        ascended: player.ascended,
+        ascnded: player.ascnded || false,
         timeChallenge: player.timeChallenge,
         hardCore: player.hardCore,
         mode: player.mode
@@ -579,7 +579,7 @@ function _update(dt) {
                 resetLevel(player);
                 gameState = "pl";
             } else if (startScreen.options[startScreen.selected] === "New Game") {
-                if (player.ascended) {
+                if (player.ascnded) {
                     gameState = "mode";
                     startScreen.selected = 0;
                     return

@@ -89,7 +89,7 @@ const sES = (plr) => {
     if (typeof plr === 'undefined') return;
     gs = "end";
     let subText = "Congratulations!";
-    let text2 = "You have ad!";
+    let text2 = "You have ascended!";
     let text3 = "Additional Challenges Unlocked!";
     let d = "Deaths: " + (p.d || 0);
     let t = "Time: " + fT(p.t);
@@ -165,7 +165,7 @@ const PC = ({
             g.velocity.y = -40;
             g.ad = true;
             g.hp = false;
-            g.saveToLocalStorage();
+            g.sfls();
             return;
         }
 
@@ -333,7 +333,7 @@ const PC = ({
         g.velocity.y = 0;
         this.bu = false;
         this.bo = false;
-        g.saveToLocalStorage();
+        g.sfls();
 
     },
 
@@ -471,7 +471,7 @@ p.onDamage = () => {
     p.controller.dead = true;
     p.d++;
 };
-p.reset = () => {
+p.r = () => {
     p.asc = 0;
     p.m = 0; // 0 = normal, 1 = ad, 2 = hard, 3 = t challenge
     p.d = 0;
@@ -485,7 +485,7 @@ p.setLevel = () => {
     p.x = lv[p.lv][0] * 8;
     p.y = lv[p.lv][1] * 8;
 };
-p.loadFromLocalStorage = () => {
+p.lfls = () => {
     const saveData = JSON.parse(localStorage.getItem("basement-cat-ascends-save"));
     if (saveData) {
         p.hp = saveData.hp || false;
@@ -501,7 +501,7 @@ p.loadFromLocalStorage = () => {
         p.setLevel();
     }
 };
-p.saveToLocalStorage = () => {
+p.sfls = () => {
     const saveData = {
         hp: p.hp,
         lv: p.lv,
@@ -509,7 +509,7 @@ p.saveToLocalStorage = () => {
         d: p.d,
         t: p.t,
         lives: p.lives,
-        ad: p.ad,
+        ad: p.ad || false,
         tc: p.tc,
         hc: p.hc,
         m: p.m
@@ -517,32 +517,32 @@ p.saveToLocalStorage = () => {
     localStorage.setItem("basement-cat-ascends-save", JSON.stringify(saveData));
 };
 p.setMode = (m) => {
-    p.reset();
+    p.r();
     p.m = m;
     if (m === 0) {
         p.hp = true;
-        p.saveToLocalStorage();
+        p.sfls();
     } else if (m === 1) {
         p.asc = 2;
         p.hp = true;
-        p.saveToLocalStorage();
+        p.sfls();
     } else if (m === 2) {
         p.asc = 2;
         p.lives = 9;
         p.hp = true;
-        p.saveToLocalStorage();
+        p.sfls();
     } else if (m === 3) {
         p.asc = 2;
         p.m = 3;
         // 5min in milliseconds
         // p.t = 3000;
         p.hp = true;
-        p.saveToLocalStorage();
+        p.sfls();
     }
 };
 
 
-p.loadFromLocalStorage();
+p.lfls();
 p.tc = false;
 p.hc = false;
 const ca = cFL(p.lv);
@@ -579,7 +579,7 @@ function _update(dt) {
         return;
     }
     if (gs === "st") {
-        p.loadFromLocalStorage();
+        p.lfls();
         if (btn_pressed(4)) {
             if (ss.o[ss.sel] === "Resume") {
                 rL(p);
@@ -590,10 +590,10 @@ function _update(dt) {
                     ss.sel = 0;
                     return
                 } else {
-                    p.reset();
+                    p.r();
                     p.hp = true;
                     p.lv = 0;
-                    p.saveToLocalStorage();
+                    p.sfls();
                     rL(p);
                     gs = "pl";
                     return;
@@ -645,7 +645,7 @@ function _update(dt) {
             p.controller.go = true;
             p.sprite.active = false;
             p.t = 0;
-            p.saveToLocalStorage();
+            p.sfls();
             return;
         }
         p.t += dt;
@@ -659,7 +659,7 @@ function _update(dt) {
             if (p.lv % 8 === 0 && p.lv > 0 && p.m === 0) {
                 gs = "new_ability";
             }
-            p.saveToLocalStorage();
+            p.sfls();
             rL(p);
 
         }
@@ -680,7 +680,7 @@ function _update(dt) {
             p.controller.resetState();
             p.hp = false;
             rL(p);
-            p.saveToLocalStorage();
+            p.sfls();
         }
         return;
     }
