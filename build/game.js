@@ -24,7 +24,6 @@ class Renderer {
             tileMap: this.prepTexture({ width: 128 * this.spriteSize, height: 64 * this.spriteSize })
 
         };
-        this.offscreenTexture = null;
         this.maxSprites = 2000;
         this.vertexSize = 4 * 6; // 4 floats per vertex (x, y, u, v), 6 vertices per quad
         this.spriteBatch = new Float32Array(this.maxSprites * this.vertexSize);
@@ -122,9 +121,9 @@ class Renderer {
         return program;
     }
 
-    setPalette(palette) {
-        this.palette = palette;
-    }
+    // setPalette(palette) {
+    //     this.palette = palette;
+    // }
 
     loadSpriteDataToTexture(spriteData) {
         this.spriteData = spriteData;
@@ -296,22 +295,22 @@ class Renderer {
         this.drawRect(x, y + height - this.scale, width, this.scale, color);
     }
 
-    drawSprite(id, x, y, options = { scaleX: 1, scaleY: 1, flipX: false, flipY: false }) {
-        let spriteX = (id % this.numberOfCols) * this.spriteTrueSize / this.canvas.width;
-        let spriteY = Math.floor(id / this.numberOfCols) * this.spriteTrueSize / this.canvas.width;
-        let spriteSize = this.spriteTrueSize / this.canvas.width;
-        x = x * this.scale;
-        y = y * this.scale;
+    // drawSprite(id, x, y, options = { scaleX: 1, scaleY: 1, flipX: false, flipY: false }) {
+    //     let spriteX = (id % this.numberOfCols) * this.spriteTrueSize / this.canvas.width;
+    //     let spriteY = Math.floor(id / this.numberOfCols) * this.spriteTrueSize / this.canvas.width;
+    //     let spriteSize = this.spriteTrueSize / this.canvas.width;
+    //     x = x * this.scale;
+    //     y = y * this.scale;
 
-        this.drawQueue.push({
-            type: "sprite",
-            id,
-            x, y,
-            spriteX, spriteY,
-            spriteSize,
-            options
-        });
-    }
+    //     this.drawQueue.push({
+    //         type: "sprite",
+    //         id,
+    //         x, y,
+    //         spriteX, spriteY,
+    //         spriteSize,
+    //         options
+    //     });
+    // }
 
     drawText(text, x, y, colorIndex = 7, options = {}) {
         x = x * this.scale;
@@ -356,68 +355,68 @@ class Renderer {
 
     }
 
-    flushSpriteBatchRange(startIdx, endIdxExclusive) {
-        const gl = this.gl;
-        let spriteCount = 0;
+    // flushSpriteBatchRange(startIdx, endIdxExclusive) {
+    //     const gl = this.gl;
+    //     let spriteCount = 0;
 
-        for (let i = startIdx; i < endIdxExclusive; i++) {
-            const cmd = this.drawQueue[i];
-            if (!cmd || cmd.type !== "sprite") continue;
+    //     for (let i = startIdx; i < endIdxExclusive; i++) {
+    //         const cmd = this.drawQueue[i];
+    //         if (!cmd || cmd.type !== "sprite") continue;
 
-            const { scaleX = 1, scaleY = 1, flipX = false, flipY = false } = cmd.options ?? {};
-            const effX = scaleX * (flipX ? -1 : 1);
-            const effY = scaleY * (flipY ? -1 : 1);
+    //         const { scaleX = 1, scaleY = 1, flipX = false, flipY = false } = cmd.options ?? {};
+    //         const effX = scaleX * (flipX ? -1 : 1);
+    //         const effY = scaleY * (flipY ? -1 : 1);
 
-            const ndcX = (Math.floor(cmd.x) / (this.canvas.width / 2)) - 1;
-            const ndcY = 1 - (Math.floor(cmd.y) / (this.canvas.width / 2));
-            const spriteW = this.spriteTrueSize * scaleX / (this.canvas.width / 2);
-            const spriteH = this.spriteTrueSize * scaleY / (this.canvas.width / 2);
+    //         const ndcX = (Math.floor(cmd.x) / (this.canvas.width / 2)) - 1;
+    //         const ndcY = 1 - (Math.floor(cmd.y) / (this.canvas.width / 2));
+    //         const spriteW = this.spriteTrueSize * scaleX / (this.canvas.width / 2);
+    //         const spriteH = this.spriteTrueSize * scaleY / (this.canvas.width / 2);
 
-            let u1 = cmd.spriteX, v1 = cmd.spriteY;
-            let u2 = cmd.spriteX + cmd.spriteSize;
-            let v2 = cmd.spriteY + cmd.spriteSize;
-            if (effX < 0) [u1, u2] = [u2, u1];
-            if (effY < 0) [v1, v2] = [v2, v1];
+    //         let u1 = cmd.spriteX, v1 = cmd.spriteY;
+    //         let u2 = cmd.spriteX + cmd.spriteSize;
+    //         let v2 = cmd.spriteY + cmd.spriteSize;
+    //         if (effX < 0) [u1, u2] = [u2, u1];
+    //         if (effY < 0) [v1, v2] = [v2, v1];
 
-            const base = spriteCount * 6 * 4;
-            const verts = this.spriteBatch;
+    //         const base = spriteCount * 6 * 4;
+    //         const verts = this.spriteBatch;
 
-            const quad = [
-                [ndcX, ndcY, u1, v1],
-                [ndcX + spriteW, ndcY, u2, v1],
-                [ndcX, ndcY - spriteH, u1, v2],
-                [ndcX, ndcY - spriteH, u1, v2],
-                [ndcX + spriteW, ndcY, u2, v1],
-                [ndcX + spriteW, ndcY - spriteH, u2, v2],
-            ];
+    //         const quad = [
+    //             [ndcX, ndcY, u1, v1],
+    //             [ndcX + spriteW, ndcY, u2, v1],
+    //             [ndcX, ndcY - spriteH, u1, v2],
+    //             [ndcX, ndcY - spriteH, u1, v2],
+    //             [ndcX + spriteW, ndcY, u2, v1],
+    //             [ndcX + spriteW, ndcY - spriteH, u2, v2],
+    //         ];
 
-            for (let j = 0; j < 6; j++) {
-                const o = base + j * 4;
-                verts[o + 0] = quad[j][0]; verts[o + 1] = quad[j][1];
-                verts[o + 2] = quad[j][2]; verts[o + 3] = quad[j][3];
-            }
+    //         for (let j = 0; j < 6; j++) {
+    //             const o = base + j * 4;
+    //             verts[o + 0] = quad[j][0]; verts[o + 1] = quad[j][1];
+    //             verts[o + 2] = quad[j][2]; verts[o + 3] = quad[j][3];
+    //         }
 
-            spriteCount++;
-            if (spriteCount >= this.maxSprites) {
-                gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, this.textureMap.sprite);
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, this.spriteBatch.subarray(0, spriteCount * 6 * 4), gl.DYNAMIC_DRAW);
-                gl.drawArrays(gl.TRIANGLES, 0, spriteCount * 6);
-                spriteCount = 0; // fortsätt fylla från början igen
-            }
-        }
+    //         spriteCount++;
+    //         if (spriteCount >= this.maxSprites) {
+    //             gl.activeTexture(gl.TEXTURE0);
+    //             gl.bindTexture(gl.TEXTURE_2D, this.textureMap.sprite);
+    //             gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    //             gl.bufferData(gl.ARRAY_BUFFER, this.spriteBatch.subarray(0, spriteCount * 6 * 4), gl.DYNAMIC_DRAW);
+    //             gl.drawArrays(gl.TRIANGLES, 0, spriteCount * 6);
+    //             spriteCount = 0; // fortsätt fylla från början igen
+    //         }
+    //     }
 
-        if (spriteCount > 0) {
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, this.textureMap.sprite);
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, this.spriteBatch.subarray(0, spriteCount * 6 * 4), gl.DYNAMIC_DRAW);
-            gl.drawArrays(gl.TRIANGLES, 0, spriteCount * 6);
-        }
+    //     if (spriteCount > 0) {
+    //         gl.activeTexture(gl.TEXTURE0);
+    //         gl.bindTexture(gl.TEXTURE_2D, this.textureMap.sprite);
+    //         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    //         gl.bufferData(gl.ARRAY_BUFFER, this.spriteBatch.subarray(0, spriteCount * 6 * 4), gl.DYNAMIC_DRAW);
+    //         gl.drawArrays(gl.TRIANGLES, 0, spriteCount * 6);
+    //     }
 
-        return endIdxExclusive;
-    }
+    //     return endIdxExclusive;
+    // }
 
 
     renderTilemap(cmd) {
@@ -517,32 +516,32 @@ class Renderer {
         gl.disable(gl.SCISSOR_TEST);
     }
 
-    drawEvenCircleFill(cmd) {
-        const { x: cx, y: cy, radius: r, color } = cmd;
-        const s = this.scale;
-        if (r === 1) {
-            // 2x2 mitt
-            this.drawRectImmediate({ x: (cx - r) * s, y: (cy - r) * s, width: 2 * s, height: 2 * s, color });
-            return;
-        }
-        const r2 = r * r;
+    // drawEvenCircleFill(cmd) {
+    //     const { x: cx, y: cy, radius: r, color } = cmd;
+    //     const s = this.scale;
+    //     if (r === 1) {
+    //         // 2x2 mitt
+    //         this.drawRectImmediate({ x: (cx - r) * s, y: (cy - r) * s, width: 2 * s, height: 2 * s, color });
+    //         return;
+    //     }
+    //     const r2 = r * r;
 
-        for (let dy = -r; dy < r; dy++) {
-            const yc = dy + 0.5;
-            const t = r2 - yc * yc - 1;
-            if (t <= 0) continue;
-            const dx = Math.max(0, Math.round(Math.sqrt(t))); // runda upp till närmaste int    
-            const w = dx * 2;
-            if (w <= 0) continue;
-            this.drawRectImmediate({
-                x: (cx - dx) * s,
-                y: (cy + dy) * s,
-                width: w * s,
-                height: s,
-                color
-            });
-        }
-    }
+    //     for (let dy = -r; dy < r; dy++) {
+    //         const yc = dy + 0.5;
+    //         const t = r2 - yc * yc - 1;
+    //         if (t <= 0) continue;
+    //         const dx = Math.max(0, Math.round(Math.sqrt(t))); // runda upp till närmaste int    
+    //         const w = dx * 2;
+    //         if (w <= 0) continue;
+    //         this.drawRectImmediate({
+    //             x: (cx - dx) * s,
+    //             y: (cy + dy) * s,
+    //             width: w * s,
+    //             height: s,
+    //             color
+    //         });
+    //     }
+    // }
 
 
     drawSpriteWithSingleColor(id, x, y, color, { scale = 1, flipX = false, flipY = false } = {}) {
@@ -579,47 +578,47 @@ class Renderer {
     }
 
 
-    drawPixel(x, y, color) {
-        const gl = this.gl;
-        const size = this.scale; // Size of the pixel, adjust if needed
-        const pixelX = x * this.canvas.width / 2;
-        const pixelY = y * this.canvas.height / 2;
+    // drawPixel(x, y, color) {
+    //     const gl = this.gl;
+    //     const size = this.scale; // Size of the pixel, adjust if needed
+    //     const pixelX = x * this.canvas.width / 2;
+    //     const pixelY = y * this.canvas.height / 2;
 
-        gl.enable(gl.SCISSOR_TEST);
-        gl.scissor(pixelX, pixelY, size, size);
-        gl.clearColor(color[0], color[1], color[2], color[3] || 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.disable(gl.SCISSOR_TEST);
-    }
+    //     gl.enable(gl.SCISSOR_TEST);
+    //     gl.scissor(pixelX, pixelY, size, size);
+    //     gl.clearColor(color[0], color[1], color[2], color[3] || 1.0);
+    //     gl.clear(gl.COLOR_BUFFER_BIT);
+    //     gl.disable(gl.SCISSOR_TEST);
+    // }
 
-    drawTilemapTexture(screenX, screenY, scale = 1) {
-        const gl = this.gl;
-        const w = 128 * scale;
-        const h = 128 * scale;
+    // drawTilemapTexture(screenX, screenY, scale = 1) {
+    //     const gl = this.gl;
+    //     const w = 128 * scale;
+    //     const h = 128 * scale;
 
-        const halfW = this.canvas.width / 2;
+    //     const halfW = this.canvas.width / 2;
 
-        const ndcX1 = (screenX / halfW) - 1;
-        const ndcY1 = 1 - (screenY / halfW);
-        const ndcX2 = ndcX1 + w / halfW;
-        const ndcY2 = ndcY1 - h / halfW;
+    //     const ndcX1 = (screenX / halfW) - 1;
+    //     const ndcY1 = 1 - (screenY / halfW);
+    //     const ndcX2 = ndcX1 + w / halfW;
+    //     const ndcY2 = ndcY1 - h / halfW;
 
-        const vertices = new Float32Array([
-            ndcX1, ndcY1, 0, 0,
-            ndcX2, ndcY1, 1, 0,
-            ndcX1, ndcY2, 0, 1,
-            ndcX1, ndcY2, 0, 1,
-            ndcX2, ndcY1, 1, 0,
-            ndcX2, ndcY2, 1, 1
-        ]);
+    //     const vertices = new Float32Array([
+    //         ndcX1, ndcY1, 0, 0,
+    //         ndcX2, ndcY1, 1, 0,
+    //         ndcX1, ndcY2, 0, 1,
+    //         ndcX1, ndcY2, 0, 1,
+    //         ndcX2, ndcY1, 1, 0,
+    //         ndcX2, ndcY2, 1, 1
+    //     ]);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.offscreenTexture);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    //     gl.activeTexture(gl.TEXTURE0);
+    //     gl.bindTexture(gl.TEXTURE_2D, this.offscreenTexture);
+    //     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+    //     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    //     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    }
+    // }
 
     render() {
         const gl = this.gl;
@@ -635,26 +634,26 @@ class Renderer {
         gl.enableVertexAttribArray(this.texcoordLoc);
         gl.vertexAttribPointer(this.texcoordLoc, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
 
-        let batchStart = -1;
+        // let batchStart = -1;
 
-        const flushIfActive = (i) => {
-            if (batchStart !== -1) {
-                this.flushSpriteBatchRange(batchStart, i);
-                batchStart = -1;
-            }
-        };
+        // const flushIfActive = (i) => {
+        //     if (batchStart !== -1) {
+        //         this.flushSpriteBatchRange(batchStart, i);
+        //         batchStart = -1;
+        //     }
+        // };
 
         for (let i = 0; i < this.drawQueue.length; i++) {
             const cmd = this.drawQueue[i];
-            if (!cmd) continue;
+            // if (!cmd) continue;
 
-            if (cmd.type === "sprite") {
-                if (batchStart === -1) batchStart = i; // börja batcha här
-                continue; // vänta med flush tills vi möter annat än sprite
-            }
+            // if (cmd.type === "sprite") {
+            //     if (batchStart === -1) batchStart = i; // börja batcha här
+            //     continue; // vänta med flush tills vi möter annat än sprite
+            // }
 
-            // icke-sprite -> flush spritebatch före vi ritar detta
-            flushIfActive(i);
+            // // icke-sprite -> flush spritebatch före vi ritar detta
+            // flushIfActive(i);
             if (cmd.type === "font") {
                 this.drawFont(cmd); // flytta fontkod till egen metod för renhet
             }
@@ -668,7 +667,7 @@ class Renderer {
                 this.renderTilemap(cmd);
             }
         }
-        flushIfActive(this.drawQueue.length);
+        // flushIfActive(this.drawQueue.length);
         this.clearDrawQueue();
     }
 }
@@ -724,16 +723,16 @@ class GameParser {
                     }
                 ),
 
-            map: (cx, cy, mx, my, mw, mh) => this.renderer.drawTilemap(cx, cy, mx, my, mw, mh),
+            // map: (cx, cy, mx, my, mw, mh) => this.renderer.drawTilemap(cx, cy, mx, my, mw, mh),
             cam: (cx, cy, scale = 1) => this.drawCamera(cx, cy, scale),
             rect: (x, y, width, height, color = 7) => this.renderer.drawRect(x * this.scale, y * this.scale, width * this.scale, height * this.scale, this.colorPalette[color]),
-            collide: (x, y) => this.collisionHelper.isPointSolid(x, y),
-            collide_circle: (x, y, r) => this.collisionHelper.isCircleColliding(x, y, r),
+            // collide: (x, y) => this.collisionHelper.isPointSolid(x, y),
+            // collide_circle: (x, y, r) => this.collisionHelper.isCircleColliding(x, y, r),
             collide_box: (x, y, w, h, mask = null, map = null) => this.collisionHelper.isBoxColliding(x, y, w, h, { map, mask }),
-            collide_boxes: (ax, ay, aw, ah, bx, by, bw, bh) => this.collisionHelper.aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh),
+            // collide_boxes: (ax, ay, aw, ah, bx, by, bw, bh) => this.collisionHelper.aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh),
             check_half_tile: (x, y, w, h, mask, side, map = this.map) => this.collisionHelper.checkHalfTile(x, y, w, h, mask, side, map),
-            make_collider: (map = null, tileSize = null) => { return new CollisionHelper(map || this.collisionLayer, tileSize, this.scale); },
-            circ: (x, y, r, color = 7) => this.renderer.drawCircle(x, y, r, this.colorPalette[color]),
+            // make_collider: (map = null, tileSize = null) => { return new CollisionHelper(map || this.collisionLayer, tileSize, this.scale); },
+            // circ: (x, y, r, color = 7) => this.renderer.drawCircle(x, y, r, this.colorPalette[color]),
             btn: (id) => !!(this.keyboardState?.[id] || this.gamepadState?.[id]),
             btn_pressed: (id) => {
                 const ks = !!this.keyboardState?.[id];
@@ -779,9 +778,9 @@ class GameParser {
             ArrowUp: 2,
             ArrowDown: 3,
             Space: 4,  // A
-            x: 5,  // B
+            // x: 5,  // B
             Enter: 6,  // Start
-            Shift: 7,  // Select
+            // Shift: 7,  // Select
             a: 0,
             d: 1,
             w: 2,
@@ -1096,7 +1095,7 @@ class CollisionHelper {
         this.mask = defaultMask & 0xFF;
     }
 
-    setMask(mask) { this.mask = mask & 0xFF; }
+    // setMask(mask) { this.mask = mask & 0xFF; }
 
     _flagsAt(tx, ty, map = null) {
         const m = map || this.map;
@@ -1109,36 +1108,36 @@ class CollisionHelper {
         return (this._flagsAt(tx, ty, map) & mask) !== 0;
     }
 
-    isSolidTile(tx, ty, map = this.map, mask = this.mask) {
-        return this._tileHitsMask(tx, ty, mask, map);
-    }
+    // isSolidTile(tx, ty, map = this.map, mask = this.mask) {
+    //     return this._tileHitsMask(tx, ty, mask, map);
+    // }
 
 
-    isPointSolid(x, y, map = this.map, mask = this.mask) {
-        x = x * this.scale; y = y * this.scale;
-        const tx = Math.floor(x / this.tileSize);
-        const ty = Math.floor(y / this.tileSize);
-        return this._tileHitsMask(tx, ty, mask, map);
-    }
+    // isPointSolid(x, y, map = this.map, mask = this.mask) {
+    //     x = x * this.scale; y = y * this.scale;
+    //     const tx = Math.floor(x / this.tileSize);
+    //     const ty = Math.floor(y / this.tileSize);
+    //     return this._tileHitsMask(tx, ty, mask, map);
+    // }
 
-    isCircleColliding(cx, cy, r, map = this.map, mask = this.mask) {
-        cx *= this.scale; cy *= this.scale; r *= this.scale;
-        const ts = this.tileSize;
-        // off-by-one fix: inkludera kanten korrekt
-        const minX = Math.floor((cx - r) / ts);
-        const maxX = Math.floor((cx + r - 1) / ts);
-        const minY = Math.floor((cy - r) / ts);
-        const maxY = Math.floor((cy + r - 1) / ts);
+    // isCircleColliding(cx, cy, r, map = this.map, mask = this.mask) {
+    //     cx *= this.scale; cy *= this.scale; r *= this.scale;
+    //     const ts = this.tileSize;
+    //     // off-by-one fix: inkludera kanten korrekt
+    //     const minX = Math.floor((cx - r) / ts);
+    //     const maxX = Math.floor((cx + r - 1) / ts);
+    //     const minY = Math.floor((cy - r) / ts);
+    //     const maxY = Math.floor((cy + r - 1) / ts);
 
-        for (let y = minY; y <= maxY; y++) {
-            for (let x = minX; x <= maxX; x++) {
-                if (!this._tileHitsMask(x, y, mask, map)) continue;
-                const rectX = x * ts, rectY = y * ts;
-                if (this.circleVsRect(cx, cy, r, rectX, rectY, ts, ts)) return true;
-            }
-        }
-        return false;
-    }
+    //     for (let y = minY; y <= maxY; y++) {
+    //         for (let x = minX; x <= maxX; x++) {
+    //             if (!this._tileHitsMask(x, y, mask, map)) continue;
+    //             const rectX = x * ts, rectY = y * ts;
+    //             if (this.circleVsRect(cx, cy, r, rectX, rectY, ts, ts)) return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     isBoxColliding(x, y, w, h, options = {}) {
         const map = options.map || this.map;
@@ -1195,20 +1194,20 @@ class CollisionHelper {
     }
 
 
-    circleVsRect(cx, cy, r, rx, ry, rw, rh) {
-        const closestX = Math.max(rx, Math.min(cx, rx + rw));
-        const closestY = Math.max(ry, Math.min(cy, ry + rh));
-        const dx = cx - closestX;
-        const dy = cy - closestY;
-        return (dx * dx + dy * dy) < (r * r);
-    }
+    // circleVsRect(cx, cy, r, rx, ry, rw, rh) {
+    //     const closestX = Math.max(rx, Math.min(cx, rx + rw));
+    //     const closestY = Math.max(ry, Math.min(cy, ry + rh));
+    //     const dx = cx - closestX;
+    //     const dy = cy - closestY;
+    //     return (dx * dx + dy * dy) < (r * r);
+    // }
 
-    aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
-        return (
-            ax < bx + bw && ax + aw > bx &&
-            ay < by + bh && ay + ah > by
-        );
-    }
+    // aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+    //     return (
+    //         ax < bx + bw && ax + aw > bx &&
+    //         ay < by + bh && ay + ah > by
+    //     );
+    // }
 
 }
 
@@ -1373,9 +1372,9 @@ function unflatten2D(flat, rows, cols) {
 }
 
 // ==== Apply unpacked data ====
-gameData.sprites = unflatten3D(unpack(gameData.sprites), 128, 8, 8);
-gameData.tilemap = unflatten2D(unpack(gameData.tilemap), 64, 128);
-gameData.collision = unflatten2D(unpack(gameData.collision), 64, 128);
+gameData.sprites = unflatten3D(unpack(gameData.sprites), 26, 8, 8);
+gameData.tilemap = unflatten2D(unpack(gameData.tilemap), 64, 96);
+gameData.collision = unflatten2D(unpack(gameData.collision), 64, 96);
 gameData.charBitmapsData = unflatten3D(unpack(gameData.charBitmapsData), 46, 8, 8);
 gameData.charBitmaps = unpackCharBitmaps(gameData.charMap, gameData.charBitmapsData);
 gameData.inputMap = gameData.inputMap

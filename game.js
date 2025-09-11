@@ -16,6 +16,11 @@ const resetLevel = (player) => {
     camera.y = cameraFromLevel(player.level).y;
 }
 
+const cTxt = (text) => {
+    let x = 64 - (text.length * 4) / 3 - 7;
+    return x;
+}
+
 const renderStartScreen = (startScreen, player) => {
     let title = "Basement Cat";
     let title2 = "Ascends";
@@ -28,14 +33,14 @@ const renderStartScreen = (startScreen, player) => {
             let mode = startScreen.game_modes[i];
             let y = 62 + i * 6;
             let color = startScreen.selected === i ? 7 : 5;
-            print(mode, 64 - (mode.length * 4) / 3 - 7, y, color, 0.5);
+            print(mode, cTxt(mode), y, color, 0.5);
         }
     } else {
         for (let i = 0; i < startScreen.options.length; i++) {
             let option = startScreen.options[i];
             let y = 62 + i * 6;
             let color = startScreen.selected === i ? 7 : 5;
-            print(option, 64 - (option.length * 4) / 3 - 7, y, color, 0.5);
+            print(option, cTxt(option), y, color, 0.5);
 
         }
     }
@@ -55,7 +60,7 @@ const renderPauseScreen = () => {
 const renderGameOverScreen = () => {
     cls(1);
     print("GAME OVER", 35, 58, 7, 1);
-    let restartText = "Press A/Space to restart";
+    let restartText = "Press A to restart";
     print(restartText, 64 - (restartText.length * 4) / 3 - 5, 75, 0, 0.5);
 }
 
@@ -64,11 +69,11 @@ const renderAbilityScreen = () => {
     let text = player.level > 8 ? "You've reached the attic!" : "You've reached the living room!";
     let subText = player.level > 8 ? "You can now dash by " : "You can now double jump!";
     let subText2 = "pressing down and jump button";
-    let continueText = "Press A or Space to continue";
-    print(text, 64 - (text.length * 4) / 3 - 5, 30, 7, 0.5);
-    print(subText, 64 - (subText.length * 4) / 3 - 5, 40, 7, 0.5);
-    if (player.level > 8) print(subText2, 64 - (subText2.length * 4) / 3 - 5, 50, 7, 0.5);
-    print(continueText, 64 - (continueText.length * 4) / 3 - 5, 75, 0, 0.5);
+    let continueText = "Press A to continue";
+    print(text, cTxt(text), 30, 7, 0.5);
+    print(subText, cTxt(subText), 40, 7, 0.5);
+    if (player.level > 8) print(subText2, cTxt(subText2), 50, 7, 0.5);
+    print(continueText, cTxt(continueText), 75, 0, 0.5);
 }
 
 const showEndingScreen = (plr) => {
@@ -83,11 +88,13 @@ const showEndingScreen = (plr) => {
     cls(1);
     print(subText, 30, 21, 7, 0.75);
     print(text2, 25, 35, 7, 0.75);
-    print(deaths, 64 - (deaths.length * 4) / 3 - 5, 55, 7, 0.5);
-    print(time, 64 - (time.length * 4) / 3 - 5, 61, 7, 0.5);
-    if (player.mode === 0) print(text3, 64 - (text3.length * 4) / 3 - 7, 72, 7, 0.5);
-    print(restartText, 64 - (restartText.length * 4) / 3 - 7, 81, 0, 0.5);
+    print(deaths, cTxt(deaths), 55, 7, 0.5);
+    print(time, cTxt(time), 61, 7, 0.5);
+    if (player.mode === 0) print(text3, cTxt(text3), 72, 7, 0.5);
+    print(restartText, cTxt(restartText), 81, 0, 0.5);
 }
+
+
 
 const formatTime = (t) => {
     let minutes = Math.floor(t / 60);
@@ -201,7 +208,7 @@ const PlayerController = ({
         if (this.buffer <= 0) return;
 
         // --- Boost: ner + hopp ---
-        if (g.ascension > 1 && btn(3) && !this.boostUsed) {
+        if (g.ascension > 1 && btn(3) && !this.boostUsed && !this.onWall) {
             const boostDir = g.sprite.flipX ? -1 : 1;
             if (boostDir !== 0) {
                 g.velocity.y = -jumpForce * 0.8;
@@ -535,7 +542,7 @@ let startScreen = {
     selected: 0,
     resume: player.hasPlayed || false,
     options: ["New Game"],
-    game_modes: ["Normal", "Ascended", "Hard (Nine lives)", "Time Challenge", "Back"],
+    game_modes: ["Normal", "Ascended", "Nine Lives", "Time Challenge", "Back"],
     choosing_mode: false
 };
 
