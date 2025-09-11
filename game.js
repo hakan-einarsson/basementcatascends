@@ -204,7 +204,7 @@ const PlayerController = ({
         const pushingLeft = dir < 0 && g.collisionBox.isOnWallLeft;
         const pushingRight = dir > 0 && g.collisionBox.isOnWallRight;
         this.isOnWall = !this.onGround && (pushingLeft || pushingRight);
-        if (this.isOnWall) this.boosting = false; // avbryt boost om spelaren klättrar på en vägg
+        if (this.isOnWall || g.velocity.x == 0) this.boosting = false; // avbryt boost om spelaren klättrar på en vägg
     },
 
     // === Jump, wall jump, double jump, boost ===
