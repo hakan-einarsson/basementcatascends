@@ -18,6 +18,9 @@ const rL = (p) => {
     p.velocity.y = 0;
     p.controller.dead = false;
     p.sprite.active = true;
+    p.fPa = 0.3;
+    p.controller.b = 0;
+    p.animationPlayer.play("idle");
     ca.x = cFL(p.lv).x;
     ca.y = cFL(p.lv).y;
 }
@@ -34,7 +37,7 @@ const rSS = (ss, p) => {
     print(title, 25, 20, 7, 1);
     print(title2, 36.5, 34.5, 0, 1);
     print(title2, 37, 35, 7, 1);
-    if (gs === "choose_mode") {
+    if (gs === "m") {
         for (let i = 0; i < ss.gm.length; i++) {
             let m = ss.gm[i];
             let y = 62 + i * 6;
@@ -84,13 +87,13 @@ const rAS = () => {
 
 const sES = (plr) => {
     if (typeof plr === 'undefined') return;
-    gs = "ending";
+    gs = "end";
     let subText = "Congratulations!";
     let text2 = "You have ad!";
     let text3 = "Additional Challenges Unlocked!";
     let d = "Deaths: " + (p.d || 0);
     let t = "Time: " + fT(p.t);
-    let restartText = "Press A/Space to restart";
+    let restartText = "Press A to restart";
     cls(1);
     print(subText, 30, 21, 7, 0.75);
     print(text2, 25, 35, 7, 0.75);
@@ -141,13 +144,14 @@ const PC = ({
         this.bo = false;
         this.a = false;
         this.p = false;
+        this.fPa = 0;
         this.go = false;
 
     },
 
     update(dt) {
-        if (this.p || this.go) return;
         const g = this.owner;
+        if (this.p || this.go || g.fPa > 0) return;
         if (this.dead) {
             return this.handleDeath(g);
         }
@@ -543,7 +547,7 @@ p.tc = false;
 p.hc = false;
 const ca = cFL(p.lv);
 
-let gs = "start"; // "start", "choose_mode", "pause", "playing", "game_over","ending"
+let gs = "st"; // "st", "m", "p", "pl", "go","end"
 let ss = {
     sel: 0,
     resume: p.hp || false,
@@ -562,22 +566,27 @@ function _init() {
 
 function _update(dt) {
     if (typeof p === 'undefined') return;
-    if (gs === "pause") {
+    if (p.fPa > 0) {
+        p.fPa -= dt;
+        if (p.fPa < 0) p.fPa = 0;
+        return;
+    }
+    if (gs === "p") {
         if (btn_pressed(6)) {
-            gs = "playing";
+            gs = "pl";
             p.controller.p = false;
         }
         return;
     }
-    if (gs === "start") {
+    if (gs === "st") {
         p.loadFromLocalStorage();
         if (btn_pressed(4)) {
             if (ss.o[ss.sel] === "Resume") {
                 rL(p);
-                gs = "playing";
+                gs = "pl";
             } else if (ss.o[ss.sel] === "New Game") {
                 if (p.ad) {
-                    gs = "choose_mode";
+                    gs = "m";
                     ss.sel = 0;
                     return
                 } else {
@@ -586,7 +595,7 @@ function _update(dt) {
                     p.lv = 0;
                     p.saveToLocalStorage();
                     rL(p);
-                    gs = "playing";
+                    gs = "pl";
                     return;
                 }
             }
@@ -599,7 +608,7 @@ function _update(dt) {
             ss.sel = (ss.sel + 1) % ss.o.length;
         }
     }
-    if (gs === "choose_mode") {
+    if (gs === "m") {
         if (btn_pressed(2)) {
             ss.sel = (ss.sel - 1 + ss.gm.length) % ss.gm.length;
         }
@@ -608,31 +617,31 @@ function _update(dt) {
         }
         if (btn_pressed(4)) {
             if (ss.gm[ss.sel] === "Back") {
-                gs = "start";
+                gs = "st";
                 ss.sel = 0;
                 return;
             }
             p.setMode(ss.sel);
             p.lv = 0;
             rL(p);
-            gs = "playing";
+            gs = "pl";
             return;
         }
     }
-    if (gs === "playing") {
+    if (gs === "pl") {
         if (btn_pressed(6)) {
-            gs = "pause";
+            gs = "p";
             p.controller.p = true;
             return;
         }
         if (p.m === 2 && p.d >= p.lives) {
-            gs = "game_over";
+            gs = "go";
             p.controller.go = true;
             p.sprite.active = false;
             return;
         }
         if (p.m === 3 && p.t > 300) {
-            gs = "game_over";
+            gs = "go";
             p.controller.go = true;
             p.sprite.active = false;
             p.t = 0;
@@ -660,9 +669,9 @@ function _update(dt) {
         }
     }
 
-    if (gs === "game_over") {
+    if (gs === "go") {
         if (btn_pressed(4)) {
-            gs = "start";
+            gs = "st";
             p.lv = 0;
             p.lives = p.m === 2 ? 9 : 0;
             p.d = 0;
@@ -678,13 +687,13 @@ function _update(dt) {
 
     if (gs === "new_ability") {
         if (btn_pressed(4)) {
-            gs = "playing";
+            gs = "pl";
         }
     }
 
-    if (gs === "ending") {
+    if (gs === "end") {
         if (btn_pressed(4)) {
-            gs = "start";
+            gs = "st";
             p.lv = 0;
             p.hp = false;
             p.asc = 0;
@@ -694,12 +703,12 @@ function _update(dt) {
 }
 
 function _draw(alfa) {
-    if (gs === "start" || gs === "choose_mode") {
+    if (gs === "st" || gs === "m") {
         cls(1);
         rSS(ss, p);
         return;
     }
-    if (gs === "playing" || gs === "pause") {
+    if (gs === "pl" || gs === "p") {
         if (p.lv < 8) cls(5);
         else if (p.asc < 16) cls(1);
         else cls(5);
@@ -713,12 +722,12 @@ function _draw(alfa) {
             spr(25, 1, 0, 7);
             print(fT(Math.max(0, 300 - p.t)), 10, 1, 7, 0.75);
         }
-        if (gs === "pause") {
+        if (gs === "p") {
             rPS();
         }
     }
 
-    if (gs === "game_over") {
+    if (gs === "go") {
         rGOS();
         return;
     }
@@ -728,7 +737,7 @@ function _draw(alfa) {
         return;
     }
 
-    if (gs === "ending") {
+    if (gs === "end") {
         cls(1);
         sES(p);
         return;

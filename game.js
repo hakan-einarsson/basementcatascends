@@ -12,6 +12,9 @@ const resetLevel = (player) => {
     player.velocity.y = 0;
     player.controller.dead = false;
     player.sprite.active = true;
+    player.fPa = 0.3;
+    player.controller.buffer = 0;
+    player.animationPlayer.play("idle");
     camera.x = cameraFromLevel(player.level).x;
     camera.y = cameraFromLevel(player.level).y;
 }
@@ -28,7 +31,7 @@ const renderStartScreen = (startScreen, player) => {
     print(title, 25, 20, 7, 1);
     print(title2, 36.5, 34.5, 0, 1);
     print(title2, 37, 35, 7, 1);
-    if (gameState === "choose_mode") {
+    if (gameState === "mode") {
         for (let i = 0; i < startScreen.game_modes.length; i++) {
             let mode = startScreen.game_modes[i];
             let y = 62 + i * 6;
@@ -78,13 +81,13 @@ const renderAbilityScreen = () => {
 
 const showEndingScreen = (plr) => {
     if (typeof plr === 'undefined') return;
-    gameState = "ending";
+    gameState = "end";
     let subText = "Congratulations!";
     let text2 = "You have ascended!";
     let text3 = "Additional Challenges Unlocked!";
     let deaths = "Deaths: " + (player.deaths || 0);
     let time = "Time: " + formatTime(player.time);
-    let restartText = "Press A/Space to restart";
+    let restartText = "Press A to restart";
     cls(1);
     print(subText, 30, 21, 7, 0.75);
     print(text2, 25, 35, 7, 0.75);
@@ -135,13 +138,14 @@ const PlayerController = ({
         this.boosting = false;
         this.ascending = false;
         this.paused = false;
+        this.fPa = 0;
         this.gameOver = false;
 
     },
 
     update(dt) {
-        if (this.paused || this.gameOver) return;
         const g = this.owner;
+        if (this.paused || this.gameOver || g.fPa > 0) return;
         if (this.dead) {
             return this.handleDeath(g);
         }
@@ -537,7 +541,7 @@ player.timeChallenge = false;
 player.hardCore = false;
 const camera = cameraFromLevel(player.level);
 
-let gameState = "start"; // "start", "choose_mode", "pause", "playing", "game_over","ending"
+let gameState = "st"; // "st", "mode", "p", "pl", "go","end"
 let startScreen = {
     selected: 0,
     resume: player.hasPlayed || false,
@@ -556,22 +560,27 @@ function _init() {
 
 function _update(dt) {
     if (typeof player === 'undefined') return;
-    if (gameState === "pause") {
+    if (player.fPa > 0) {
+        player.fPa -= dt;
+        if (player.fPa < 0) player.fPa = 0;
+        return;
+    }
+    if (gameState === "p") {
         if (btn_pressed(6)) {
-            gameState = "playing";
+            gameState = "pl";
             player.controller.paused = false;
         }
         return;
     }
-    if (gameState === "start") {
+    if (gameState === "st") {
         player.loadFromLocalStorage();
         if (btn_pressed(4)) {
             if (startScreen.options[startScreen.selected] === "Resume") {
                 resetLevel(player);
-                gameState = "playing";
+                gameState = "pl";
             } else if (startScreen.options[startScreen.selected] === "New Game") {
                 if (player.ascended) {
-                    gameState = "choose_mode";
+                    gameState = "mode";
                     startScreen.selected = 0;
                     return
                 } else {
@@ -580,7 +589,7 @@ function _update(dt) {
                     player.level = 0;
                     player.saveToLocalStorage();
                     resetLevel(player);
-                    gameState = "playing";
+                    gameState = "pl";
                     return;
                 }
             }
@@ -593,7 +602,7 @@ function _update(dt) {
             startScreen.selected = (startScreen.selected + 1) % startScreen.options.length;
         }
     }
-    if (gameState === "choose_mode") {
+    if (gameState === "mode") {
         if (btn_pressed(2)) {
             startScreen.selected = (startScreen.selected - 1 + startScreen.game_modes.length) % startScreen.game_modes.length;
         }
@@ -602,31 +611,31 @@ function _update(dt) {
         }
         if (btn_pressed(4)) {
             if (startScreen.game_modes[startScreen.selected] === "Back") {
-                gameState = "start";
+                gameState = "st";
                 startScreen.selected = 0;
                 return;
             }
             player.setMode(startScreen.selected);
             player.level = 0;
             resetLevel(player);
-            gameState = "playing";
+            gameState = "pl";
             return;
         }
     }
-    if (gameState === "playing") {
+    if (gameState === "pl") {
         if (btn_pressed(6)) {
-            gameState = "pause";
+            gameState = "p";
             player.controller.paused = true;
             return;
         }
         if (player.mode === 2 && player.deaths >= player.lives) {
-            gameState = "game_over";
+            gameState = "go";
             player.controller.gameOver = true;
             player.sprite.active = false;
             return;
         }
         if (player.mode === 3 && player.time > 300) {
-            gameState = "game_over";
+            gameState = "go";
             player.controller.gameOver = true;
             player.sprite.active = false;
             player.time = 0;
@@ -654,9 +663,9 @@ function _update(dt) {
         }
     }
 
-    if (gameState === "game_over") {
+    if (gameState === "go") {
         if (btn_pressed(4)) {
-            gameState = "start";
+            gameState = "st";
             player.level = 0;
             player.lives = player.mode === 2 ? 9 : 0;
             player.deaths = 0;
@@ -672,13 +681,13 @@ function _update(dt) {
 
     if (gameState === "new_ability") {
         if (btn_pressed(4)) {
-            gameState = "playing";
+            gameState = "pl";
         }
     }
 
-    if (gameState === "ending") {
+    if (gameState === "end") {
         if (btn_pressed(4)) {
-            gameState = "start";
+            gameState = "st";
             player.level = 0;
             player.hasPlayed = false;
             player.ascension = 0;
@@ -688,12 +697,12 @@ function _update(dt) {
 }
 
 function _draw(alfa) {
-    if (gameState === "start" || gameState === "choose_mode") {
+    if (gameState === "st" || gameState === "mode") {
         cls(1);
         renderStartScreen(startScreen, player);
         return;
     }
-    if (gameState === "playing" || gameState === "pause") {
+    if (gameState === "pl" || gameState === "p") {
         if (player.level < 8) cls(5);
         else if (player.ascension < 16) cls(1);
         else cls(5);
@@ -707,12 +716,12 @@ function _draw(alfa) {
             spr(25, 1, 0, 7);
             print(formatTime(Math.max(0, 300 - player.time)), 10, 1, 7, 0.75);
         }
-        if (gameState === "pause") {
+        if (gameState === "p") {
             renderPauseScreen();
         }
     }
 
-    if (gameState === "game_over") {
+    if (gameState === "go") {
         renderGameOverScreen();
         return;
     }
@@ -722,7 +731,7 @@ function _draw(alfa) {
         return;
     }
 
-    if (gameState === "ending") {
+    if (gameState === "end") {
         cls(1);
         showEndingScreen(player);
         return;
