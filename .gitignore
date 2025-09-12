@@ -1,4 +1,5 @@
 *.zip
+!index.zip
 advzip
 advzip.exe
 exportIndex.html
