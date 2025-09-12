@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-public/assets/*
+
 !public/assets/exampleCode.js
 BasementCatAscends/build/*
 *.zip

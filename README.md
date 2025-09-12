@@ -24,14 +24,14 @@ This repository contains two parts:
    - A small JavaScript engine inspired by [PICO-8](https://www.lexaloffle.com/pico-8.php).  
    - This is a work-in-progress editor and runtime I built... just to try it out. Turns out my son likes playing with it so I kept building it. The version here is incomplete and modified for the js13kGames competition.
    - It includes the sprite/tilemap/collision system used by *Basement Cat Ascends*.  
-   - The tilemap, and sprites are included as .json in the `/assets/` folder. You can import these in the editor by clicking the bottom right icon (white square) in either the sprite editor or the map editor and select the corresponding .json file.
+   - The tilemap, and sprites are included as .json in the `/assets/` folder. You can import these in the editor by clicking the bottom right icon (white square) in either the sprite editor (P) or the map editor (M) and select the corresponding .json file.
 
 The engine is **not required** to play the submitted game, but is included here for transparency, as required by the competition rules.
 
 ---
 
 ## Building
-The entry does not require a build step – the final HTML is already included. But if you want to build it just click the folder icon in the top bar, third from the right and the files should be downloaded as a zip file.  
+The entry does not require a build step – the final HTML is already included. But if you want to build it just click the folder icon in the top bar, third from the left and the files should be downloaded as a zip file.  
 
 To run the editor locally, do the following:
 
