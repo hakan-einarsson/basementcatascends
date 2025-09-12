@@ -12,7 +12,7 @@ const resetLevel = (player) => {
     player.velocity.y = 0;
     player.controller.dead = false;
     player.sprite.active = true;
-    player.fPa = 0.3;
+    player.fPa = 0.5;
     player.controller.buffer = 0;
     player.animationPlayer.play("idle");
     camera.x = cameraFromLevel(player.level).x;
@@ -242,7 +242,7 @@ const PlayerController = ({
             g.sprite.flipX = outDir < 0;
             this.wallJumpDirection = outDir;
 
-            this.forceFlipTimer = 0.12;
+            this.forceFlipTimer = 0.2;
             this.lastWallSide = 0;
 
             this.buffer = 0;
@@ -407,7 +407,7 @@ const levels = [
     [43, 46],
     [44, 30],
     [44, 14],
-    [57, 62],
+    [56, 62],
     [58, 46],
     [60, 30],
     [51, 14],
