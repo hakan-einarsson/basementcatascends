@@ -1,0 +1,18 @@
+{
+  "name": "pico-js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "terser": "^5.43.1"
+  }
+}
